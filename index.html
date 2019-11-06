@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ising Model (Meme Edition)</title>
+</head>
+<style>
+    *{
+        font-family: Courier;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        cursor: default;
+        user-select: none;
+    }
+    #tl{
+        position: absolute;
+        top: 0;
+        left: 5%;
+        width: 90%;
+        height: 5%;
+        text-align: center;
+        margin: 10px;
+    }
+    #cnv{
+        position: absolute;
+        top: 5%;
+        left: 5%;
+    }
+    #ht{
+        position: absolute;
+        top: 90%;
+        left: 5%;
+        width: 15%;
+        height: 5%;
+        text-align: left;
+        margin: 10px;
+    }
+    #hv{
+        position: absolute;
+        top: 90%;
+        left: 20%;
+        width: 15%;
+        height: 5%;
+    }
+    #tt{
+        position: absolute;
+        top: 90%;
+        left: 38%;
+        width: 12%;
+        height: 5%;
+        text-align: left;
+        margin: 10px;
+    }
+    #tv{
+        position: absolute;
+        top: 90%;
+        left: 50%;
+        width: 15%;
+        height: 5%;
+    }
+    #rb{
+        position: absolute;
+        top: 90%;
+        left: 67%;
+        width: 12%;
+        height: 5%;
+        text-align: center;
+        margin: 10px;
+    }
+    #pb{
+        position: absolute;
+        top: 90%;
+        left: 82%;
+        width: 12%;
+        height: 5%;
+        text-align: center;
+        margin: 10px;
+    }
+    #hl{
+        position: absolute;
+        top: 0;
+        left: 90%;
+        width: 5%;
+        height: 5%;
+        text-align: center;
+        margin: 10px;
+    }
+    #lt{
+        position: absolute;
+        top: 30%;
+        left: 7%;
+        width: 40%;
+        height: 85%;
+        text-align: justify;
+        visibility: hidden;
+    }
+    #im{
+        position: absolute;
+        top: 5%;
+        left: 50%;
+        width: auto;
+        height: 85%;
+        visibility: hidden;
+    }
+</style>
+<body id="body">
+<p id="tl">Ising Model (Meme Edition)</p>
+<canvas id='cnv'></canvas>
+<p id="ht">magnetic field = 0</p>
+<input id="hv" type="range" min="-1" max="1" step=".01" value="0">
+<p id="tt">temperature = 1</p>
+<input id="tv" type="range" min="0.1" max="10" step="0.1" value="1">
+<p id="rb">reset</p>
+<p id="pb">start</p>
+<p id="hl">[?]</p>
+<p id="lt">
+    The Ising model, named after the physicist Ernst Ising, is a mathematical model of ferromagnetism in
+    statistical mechanics. The model consists of discrete variables that represent magnetic dipole moments of atomic
+    "spins" that can be in one of two states (+1 or −1). The spins are arranged in a graph, usually a lattice (where
+    the local structure repeats periodically in all directions), allowing each spin to interact with its neighbors.
+    Neighboring spins that agree have a lower energy than those that disagree; the system tends to the lowest energy
+    but heat disturbs this tendency, thus creating the possibility of different structural phases. The model allows the
+    identification of phase transitions, as a simplified model of reality. The two-dimensional square-lattice Ising
+    model is one of the simplest statistical models to show a phase transition.
+    <br><br>(c) Wikipedia, motherf*cker
+</p>
+<img id="im" src="meme.jpg">
+<script>
+
+    var w0=47;
+    var h0=79;
+
+    var kx=0.9;
+    var ky=0.85;
+
+    var cw=document.documentElement.clientWidth;
+    var ch=document.documentElement.clientHeight;
+
+    var cnv=document.getElementById('cnv');
+    var ctx=cnv.getContext('2d');
+
+    cnv.width=Math.floor(kx*cw);
+    cnv.height=Math.floor(ky*ch);
+
+    var Ny=15;
+    var hm=ky*ch/Ny;
+    var wm=w0*hm/h0;
+    var Nx=Math.floor(kx*cw/wm);
+
+    var T=1;
+    var h=0;
+    var s=[];
+
+    var P=false;
+
+    var img0=new Image();
+    var img1=new Image();
+    img0.src='0.png';
+    img1.src='1.png';
+
+    function st(){
+        for (var i=0; i<Nx; i++){
+            s[i]=[];
+            for (var j=0; j<Ny; j++){
+                s[i][j]=2*Math.floor(2*Math.random())-1;
+            }
+        }
+    }
+
+    function draw(){
+        for (var i=0; i<Nx; i++){
+            for (var j=0; j<Ny; j++){
+                if (s[i][j]==-1){
+                    ctx.drawImage(img0,i*wm,j*hm,wm,hm);
+                }
+                if (s[i][j]==1){
+                    ctx.drawImage(img1,i*wm,j*hm,wm,hm);
+                }
+            }
+        }
+    }
+
+    function step(){
+        var i0=Math.floor(Nx*Math.random());
+        var j0=Math.floor(Ny*Math.random());
+        var ip=i0+1, im=i0-1, jp=j0+1, jm=j0-1;
+        if (ip>=Nx){ip=0}
+        if (im<0){im=Nx-1}
+        if (jp>=Ny){jp=0}
+        if (jm<0){jm=Ny-1}
+        var dE=2*s[i0][j0]*(s[ip][j0]+s[im][j0]+s[i0][jp]+s[i0][jm]+h);
+        if (!((dE>0)&&(Math.random()>Math.exp(-dE/T)))){
+            s[i0][j0]*=-1;
+        }
+    }
+
+    function sim(){
+        for (var t=0; t<100; t++){
+            step();
+        }
+        draw();
+        if (P) requestAnimationFrame(sim);
+    }
+
+    img1.onload=function(e){
+        st();
+        draw();
+        sim();
+    }
+
+    document.getElementById('hv').oninput=function(e){
+        h=+document.getElementById('hv').value;
+        document.getElementById('ht').innerHTML='magnetic field = '+h;
+    }
+
+    document.getElementById('tv').oninput=function(e){
+        T=+document.getElementById('tv').value;
+        document.getElementById('tt').innerHTML='temperature = '+T;
+    }
+
+    function chbold(e){
+        e.currentTarget.style.fontWeight='bold';
+    }
+
+    function chnorm(e){
+        e.currentTarget.style.fontWeight='normal';
+    }
+
+    document.getElementById('pb').onmouseover=chbold;
+    document.getElementById('pb').onmouseout=chnorm;
+    document.getElementById('rb').onmouseover=chbold;
+    document.getElementById('rb').onmouseout=chnorm;
+    document.getElementById('hl').onmouseover=chbold;
+    document.getElementById('hl').onmouseout=chnorm;
+
+    document.getElementById('pb').onclick=function(e){
+        if (P) {
+            document.getElementById('pb').innerHTML='start';
+        }
+        else{
+            document.getElementById('pb').innerHTML='pause';
+            requestAnimationFrame(sim);
+        }
+        P=!P;
+    }
+
+    document.getElementById('rb').onclick=function(e){
+        P=false;
+        st();
+        draw();
+    }
+
+    document.getElementById('hl').onclick=function(){
+        var str=document.getElementById('hl').innerHTML;
+        if (str=='[?]'){
+            P=false;
+            document.getElementById('pb').innerHTML='start';
+            document.getElementById('hl').innerHTML='[x]';
+            document.getElementById('cnv').style.visibility='hidden';
+            document.getElementById('ht').style.visibility='hidden';
+            document.getElementById('hv').style.visibility='hidden';
+            document.getElementById('tt').style.visibility='hidden';
+            document.getElementById('tv').style.visibility='hidden';
+            document.getElementById('pb').style.visibility='hidden';
+            document.getElementById('rb').style.visibility='hidden';
+            document.getElementById('lt').style.visibility='visible';
+            document.getElementById('im').style.visibility='visible';
+        }
+        if (str=='[x]'){
+            document.getElementById('hl').innerHTML='[?]';
+            document.getElementById('cnv').style.visibility='visible';
+            document.getElementById('ht').style.visibility='visible';
+            document.getElementById('hv').style.visibility='visible';
+            document.getElementById('tt').style.visibility='visible';
+            document.getElementById('tv').style.visibility='visible';
+            document.getElementById('pb').style.visibility='visible';
+            document.getElementById('rb').style.visibility='visible';
+            document.getElementById('lt').style.visibility='hidden';
+            document.getElementById('im').style.visibility='hidden';
+        }
+    }
+
+
+</script>
+</body>
+</html>
